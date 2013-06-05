@@ -24,7 +24,7 @@ class AtomDataFeedReader {
     if ($entry_node == null) {
       return null;
     } else {
-      return new AtomDataEntry($entry_node);
+      return new AtomNode($entry_node);
     }
   }
 
@@ -80,7 +80,7 @@ class AtomDataFeedReader {
 
 }
 
-class AtomDataEntry {
+class AtomNode {
 
   private $xpath;
   private $entry_node;
@@ -89,10 +89,37 @@ class AtomDataEntry {
     $this->entry_node = $entry_node;
     $this->xpath = new DOMXPath($entry_node->ownerDocument);
     $this->xpath->registerNamespace('atom', AtomDataFeedReader::$ATOM_NS);
+    $this->xpath->registerNamespace('bas', AtomDataFeedReader::$BAS_NS);
   }
 
-  public function getTitle() {
-    return $this->xpath->evaluate('string(atom:title)', $this->entry_node);
+  public function getValue($query = null) {
+    if ($query == null) {
+      return $this->entry_node->nodeValue;
+    } else {
+      $node = $this->getNode($query);
+      if ($node) {
+        return $node->getValue();
+      }
+    }
+    return null;
+  }
+
+  public function getNode($query) {
+    $nodes = $this->getNodes($query);
+    if ($nodes) {
+      return $nodes[0];
+    } else {
+      return null;
+    }
+  }
+
+  public function getNodes($query) {
+    $children = array();
+    $node_list = $this->xpath->query($query, $this->entry_node);
+    for ($i = 0; $i < $node_list->length; $i++) {
+      $children[] = new AtomNode($node_list->item($i));
+    }
+    return $children;
   }
 
 }
