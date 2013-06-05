@@ -51,6 +51,7 @@ class AtomDataFeedReader {
       $this->entry_nodelist = $dom->getElementsByTagNameNS(self::$ATOM_NS, 'entry');
       $this->entry_nodelist_position = 0;
       $this->next_url = $this->get_next_url($dom);
+      print("Next is " . $this->next_url . "\n");
       if ($this->entry_nodelist->length > 0) {
         return $this->entry_nodelist;
       }
@@ -75,12 +76,26 @@ class AtomDataFeedReader {
   private function get_next_url($dom) {
     $xpath = new DOMXPath($dom);
     $xpath->registerNamespace('atom', self::$ATOM_NS);
-    return $xpath->evaluate('/atom:feed/atom:link[@rel="next"]/@href');
+    return $xpath->evaluate('string(/atom:feed/atom:link[@rel="next"]/@href)');
   }
 
 }
 
 class AtomDataEntry {
+
+  private $xpath;
+  private $entry_node;
+
+  public function __construct ($entry_node) {
+    $this->entry_node = $entry_node;
+    $this->xpath = new DOMXPath($entry_node->ownerDocument);
+    $this->xpath->registerNamespace('atom', AtomDataFeedReader::$ATOM_NS);
+  }
+
+  public function getTitle() {
+    return $this->xpath->evaluate('string(atom:title)', $this->entry_node);
+  }
+
 }
 
 class AtomDataException extends Exception {
