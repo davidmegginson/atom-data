@@ -51,7 +51,6 @@ class AtomDataFeedReader {
       $this->entry_nodelist = $dom->getElementsByTagNameNS(self::$ATOM_NS, 'entry');
       $this->entry_nodelist_position = 0;
       $this->next_url = $this->get_next_url($dom);
-      print("Next is " . $this->next_url . "\n");
       if ($this->entry_nodelist->length > 0) {
         return $this->entry_nodelist;
       }
